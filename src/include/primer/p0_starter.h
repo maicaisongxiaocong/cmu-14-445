@@ -35,7 +35,11 @@ class Matrix {
    * @param cols The number of columns
    *
    */
-  Matrix(int rows, int cols) {}
+  Matrix(int rows, int cols) {
+    rows_ = rows;
+    cols_ = cols;
+    linear_ = new T[rows * cols];
+  }
 
   /** The number of rows in the matrix */
   int rows_;
@@ -95,7 +99,9 @@ class Matrix {
    * Destroy a matrix instance.
    * TODO(P0): Add implementation
    */
-  virtual ~Matrix() = default;
+  virtual ~Matrix(){
+    delete[] linear_;
+  }
 };
 
 /**
@@ -112,7 +118,9 @@ class RowMatrix : public Matrix<T> {
    * @param rows The number of rows
    * @param cols The number of columns
    */
-  RowMatrix(int rows, int cols) : Matrix<T>(rows, cols) {}
+  RowMatrix(int rows, int cols) : Matrix<T>(rows, cols) {
+    data_ = new T*[rows];
+  }
 
   /**
    * TODO(P0): Add implementation
@@ -166,7 +174,11 @@ class RowMatrix : public Matrix<T> {
    * @throws OUT_OF_RANGE if `source` is incorrect size
    */
   void FillFrom(const std::vector<T> &source) override {
-    throw NotImplementedException{"RowMatrix::FillFrom() not implemented."};
+    //throw NotImplementedException{"RowMatrix::FillFrom() not implemented."};
+    if(static_cast<int>(source.size()) != (Matrix<T>::rows_ * Matrix<T>::cols_)) {
+      throw Exception(ExceptionType::OUT_OF_RANGE,"source.size() != cols * rows");
+    }
+    std::copy(source.begin(),source.end(), Matrix<T>::linear_);
   }
 
   /**
@@ -174,7 +186,9 @@ class RowMatrix : public Matrix<T> {
    *
    * Destroy a RowMatrix instance.
    */
-  ~RowMatrix() override = default;
+  virtual ~RowMatrix() override{
+    delete[] data_;
+  }
 
  private:
   /**
@@ -206,7 +220,6 @@ class RowMatrixOperations {
     // TODO(P0): Add implementation
     return std::unique_ptr<RowMatrix<T>>(nullptr);
   }
-
   /**
    * Compute the matrix multiplication (`matrixA` * `matrixB` and return the result.
    * Return `nullptr` if dimensions mismatch for input matrices.
